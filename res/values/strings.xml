@@ -3,5 +3,10 @@
 
     <string name="hello">Hello World, CurrentWeatherMain!</string>
     <string name="app_name">CurrentWeather</string>
+    <string name="BUTTON_ADD">Add</string>
+    <string name="BUTTON_SETTINGS">Settings</string>
+    <string name="BUTTON_UPDATE">Update</string>
+    <string name="BUTTON_SAVE">Save</string>
+    <string name="LOCATION_LABEL">Enter your desired location name or zip code(postal code) below:</string>
 
 </resources>
