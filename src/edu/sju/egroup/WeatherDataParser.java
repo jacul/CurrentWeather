@@ -1,3 +1,8 @@
+/**
+ * Team E, CurrentWeather
+ * Principal author: Xiangdong Zhu
+ * UI design and icons: Yuning Zhang
+ */
 package edu.sju.egroup;
 
 import java.io.ByteArrayInputStream;
@@ -9,12 +14,19 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+/**
+ * This class reads a xml data, and pulls out its content. We use DOM to parse
+ * the xml stream.
+ * 
+ * @author zxd
+ * 
+ */
 public class WeatherDataParser {
+	// These are all xml nodes.
 	static final String xml_api_reply = "xml_api_reply";
 	static final String weather = "weather";
 	static final String forecast_information = "forecast_information";
@@ -47,6 +59,14 @@ public class WeatherDataParser {
 		weatherdata = new WeatherData();
 	}
 
+	/**
+	 * Parse the data and generate a WeatherData object.
+	 * 
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 * @throws Exception
+	 */
 	public void parse() throws ParserConfigurationException, SAXException, IOException, Exception {
 
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -79,6 +99,11 @@ public class WeatherDataParser {
 
 	}
 
+	/**
+	 * Retrieve the weather data we generated.
+	 * 
+	 * @return
+	 */
 	public WeatherData getResult() {
 		return weatherdata;
 	}

@@ -1,3 +1,8 @@
+/**
+ * Team E, CurrentWeather
+ * Principal author: Xiangdong Zhu
+ * UI design and icons: Yuning Zhang
+ */
 package edu.sju.egroup;
 
 import android.app.Activity;
@@ -46,9 +51,7 @@ public class AddLocationActivity extends Activity {
 
 	View.OnClickListener mOnClickListener = new View.OnClickListener() {
 		public void onClick(View v) {
-			final Context context = AddLocationActivity.this;
 
-			new UpdateIconTask(context, widgetId).execute("/ig/images/weather/sunny.gif");
 			// Make sure we pass back the original appWidgetId
 			Intent resultValue = new Intent();
 			resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);

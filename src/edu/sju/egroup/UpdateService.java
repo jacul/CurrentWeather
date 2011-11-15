@@ -1,3 +1,8 @@
+/**
+ * Team E, CurrentWeather
+ * Principal author: Xiangdong Zhu
+ * UI design and icons: Yuning Zhang
+ */
 package edu.sju.egroup;
 
 import java.io.BufferedInputStream;
@@ -50,6 +55,7 @@ public class UpdateService extends Service {
 	protected static byte[] getResource(String resourcePath) {
 		if (resourcePath == null)
 			return null;
+		System.out.println(resourcePath);
 		URL url;
 		try {
 			url = new URL(resourcePath);

@@ -1,3 +1,8 @@
+/**
+ * Team E, CurrentWeather
+ * Principal author: Xiangdong Zhu
+ * UI design and icons: Yuning Zhang
+ */
 package edu.sju.egroup;
 
 import java.util.HashMap;
@@ -6,7 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 
-public class IconFactory implements NetworkConstant{
+public class IconFactory implements NetworkConstant {
 	// keep no instance
 	private IconFactory() {
 	};
@@ -29,6 +34,9 @@ public class IconFactory implements NetworkConstant{
 			return iconCache.get(iconpath);
 		} else {
 			Bitmap newIcon = fetchIconFromWeb(iconpath);
+			if (newIcon == null) {
+				return null;
+			}
 			iconCache.put(iconpath, newIcon);
 			return newIcon;
 		}

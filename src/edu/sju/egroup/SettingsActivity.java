@@ -1,3 +1,8 @@
+/**
+ * Team E, CurrentWeather
+ * Principal author: Xiangdong Zhu
+ * UI design and icons: Yuning Zhang
+ */
 package edu.sju.egroup;
 
 import android.app.Activity;
