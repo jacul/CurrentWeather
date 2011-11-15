@@ -7,16 +7,15 @@ package edu.sju.egroup;
 
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
-public class AddLocationActivity extends Activity {
-	int widgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
-	private EditText locationText;
+public class AddLocationActivity extends Activity implements SettingsConstant {
+	int					widgetId	= AppWidgetManager.INVALID_APPWIDGET_ID;
+	private EditText	locationText;
 
 	@Override
 	public void onCreate(Bundle savedBundle) {
@@ -30,8 +29,30 @@ public class AddLocationActivity extends Activity {
 		setContentView(R.layout.addlocation);
 
 		// Find the EditText
-		locationText = (EditText) findViewById(R.id.locationText);
+		locationText = (EditText)findViewById(R.id.locationText);
+		mOnClickListener = new View.OnClickListener() {
+			public void onClick(View v) {
 
+				/**
+				 * To know if the input location is a valid one, we have to
+				 * start the update service to check it.
+				 */
+				Intent testUpdateIntent = new Intent(AddLocationActivity.this,
+						UpdateService.class);
+				testUpdateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
+						widgetId);
+				testUpdateIntent.putExtra(LOCATION, locationText.getText()
+						.toString());
+				AddLocationActivity.this.startService(testUpdateIntent);
+
+				// Make sure we pass back the original appWidgetId
+				Intent resultValue = new Intent();
+				resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
+						widgetId);
+				setResult(RESULT_OK, resultValue);
+				finish();
+			}
+		};
 		// Bind the action for the save button.
 		findViewById(R.id.save_button).setOnClickListener(mOnClickListener);
 
@@ -39,24 +60,11 @@ public class AddLocationActivity extends Activity {
 		Intent intent = getIntent();
 		Bundle extras = intent.getExtras();
 		if (extras != null) {
-			widgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
+			widgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
+					AppWidgetManager.INVALID_APPWIDGET_ID);
 		}
-
-		// If they gave us an intent without the widget id, just bail.
-		// if (mAppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
-		// finish();
-		// }
 
 	}
 
-	View.OnClickListener mOnClickListener = new View.OnClickListener() {
-		public void onClick(View v) {
-
-			// Make sure we pass back the original appWidgetId
-			Intent resultValue = new Intent();
-			resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
-			setResult(RESULT_OK, resultValue);
-			finish();
-		}
-	};
+	View.OnClickListener	mOnClickListener;
 }

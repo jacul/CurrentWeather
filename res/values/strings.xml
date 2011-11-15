@@ -8,5 +8,23 @@
     <string name="BUTTON_UPDATE">Update</string>
     <string name="BUTTON_SAVE">Save</string>
     <string name="LOCATION_LABEL">Enter your desired location name or zip code(postal code) below:</string>
+    <string name="AUTOUPDATE">Automatic Update</string>
+    <string-array name="update_array">
+        <item>Every 1 hour</item>
+        <item>Every 2 hours</item>
+        <item>Every 3 hours</item>
+        <item>Every 6 hours</item>
+        <item>Every 12 hours</item>
+        <item>Every day</item>
+        <item>Manual</item>
+    </string-array>
+    <string-array name="onoff_array">
+        <item>On</item>
+        <item>Off</item>
+    </string-array>
+    <string-array name="temp_array">
+        <item>C</item>
+        <item>F</item>
+    </string-array>
 
 </resources>

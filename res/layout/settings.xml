@@ -3,6 +3,66 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    
+    <Spinner
+        android:id="@+id/onoffspinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:prompt="@string/AUTOUPDATE" />
+
+    <Spinner
+        android:id="@+id/updatespinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/onoffspinner"
+        android:layout_marginTop="23dp" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/updatespinner"
+        android:layout_alignBottom="@+id/updatespinner"
+        android:layout_alignParentLeft="true"
+        android:text="Update Frequency"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/onoffspinner"
+        android:layout_alignBottom="@+id/onoffspinner"
+        android:layout_alignRight="@+id/textView1"
+        android:text="Automatic update"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <Spinner
+        android:id="@+id/tempspinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/updatespinner"
+        android:layout_marginTop="27dp" />
+
+    <Button
+        android:id="@+id/set_save_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="@string/BUTTON_SAVE" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/tempspinner"
+        android:layout_alignBottom="@+id/tempspinner"
+        android:layout_alignParentLeft="true"
+        android:text="Temperature Format"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>

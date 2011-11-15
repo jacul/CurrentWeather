@@ -14,20 +14,10 @@
 				android:resource="@xml/widget_provider" />
 		</receiver>
 	<activity android:name="AddLocationActivity">
-		<intent-filter>
-			<action android:name="edu.sju.egroup.WeatherWidget.ACTION_WIDGET_ADD"/>
-		</intent-filter>
 	</activity>
 	<activity android:name="SettingsActivity">
-		<intent-filter>
-			<action android:name="edu.sju.egroup.WeatherWidget.ACTION_WIDGET_SET"/>
-		</intent-filter>
 	</activity>
-	<service android:name="UpdateService">
-		<intent-filter>
-			<action android:name="edu.sju.egroup.WeatherWidget.ACTION_WIDGET_UPDATE"/>
-		</intent-filter>
-	</service>
+	<service android:name=".UpdateService"/>
     </application>
     <uses-sdk android:minSdkVersion="10" />
 
