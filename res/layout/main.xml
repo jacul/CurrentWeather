@@ -11,9 +11,15 @@
 
 
 
+
+
     android:id="@+id/relativeLayout1"
     android:layout_width="190dp"
     android:layout_height="190dp">
+
+    
+
+    
 
     
 
@@ -194,7 +200,7 @@
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:scaleType="centerCrop"
-            android:src="@drawable/sunny" />
+            android:src="@drawable/na" />
 
         <LinearLayout
             android:id="@+id/linearLayout4"

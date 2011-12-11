@@ -1,25 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="edu.sju.egroup"
-      android:versionCode="1"
-      android:versionName="1.0">
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <application android:icon="@drawable/icon" android:label="@string/app_name">
-	<receiver android:name=".WeatherWidget">
-			<intent-filter>
-				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-				<action android:name="android.appwidget.action.APPWIDGET_ENABLED"/>
-			</intent-filter>
-			<meta-data android:name="android.appwidget.provider"
-				android:resource="@xml/widget_provider" />
-		</receiver>
-	<activity android:name="AddLocationActivity">
-	</activity>
-	<activity android:name="SettingsActivity">
-	</activity>
-	<service android:name=".UpdateService"/>
+    package="edu.sju.egroup"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
+    <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" />
+
+    <application
+        android:icon="@drawable/icon"
+        android:label="@string/app_name" >
+        <receiver android:name=".WeatherWidget" >
+            <intent-filter >
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.appwidget.action.APPWIDGET_ENABLED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_provider" />
+        </receiver>
+
+        <activity android:name="AddLocationActivity" >
+        </activity>
+        <activity android:name="SettingsActivity" >
+        </activity>
+
+        <service android:name=".UpdateService" />
+
+        <activity android:name="LocationManagerActivity" >
+        </activity>
+        <activity android:name="ToDoListActivity" >
+        </activity>
+        <activity android:name="AddToDoActivity" >
+        </activity>
     </application>
+
     <uses-sdk android:minSdkVersion="10" />
 
-</manifest> 
-		
+</manifest>

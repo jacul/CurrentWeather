@@ -26,5 +26,14 @@
         <item>C</item>
         <item>F</item>
     </string-array>
+    <string-array name="weatherconditions">
+        <item>Rain</item>
+        <item>Sunny</item>
+    	<item>Haze</item>
+        <item>Cloudy</item>
+        <item>Snow</item>
+        <item>Mist</item>
+        <item>Fog</item>
+    </string-array>
 
 </resources>

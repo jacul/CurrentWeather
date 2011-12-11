@@ -4,7 +4,7 @@
     android:layout_height="match_parent" >
 
     <Spinner
-        android:id="@+id/onoffspinner"
+        android:id="@+id/autoupdatespinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
@@ -16,7 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/onoffspinner"
+        android:layout_below="@+id/autoupdatespinner"
         android:layout_marginTop="23dp" />
 
     <TextView
@@ -47,14 +47,6 @@
         android:layout_below="@+id/updatespinner"
         android:layout_marginTop="27dp" />
 
-    <Button
-        android:id="@+id/set_save_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:text="@string/BUTTON_SAVE" />
-
     <TextView
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
@@ -64,5 +56,30 @@
         android:layout_alignParentLeft="true"
         android:text="Temperature Format"
         android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <Button
+        android:id="@+id/set_manageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tempspinner"
+        android:layout_centerHorizontal="true"
+        android:text="Manage TO-Do list" />
+
+    <Button
+        android:id="@+id/set_save_button"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignRight="@+id/textView1"
+        android:text="@string/BUTTON_SAVE" />
+
+    <Button
+        android:id="@+id/set_cancelButton"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="16dp"
+        android:layout_toRightOf="@+id/textView3"
+        android:text="Cancel" />
 
 </RelativeLayout>
