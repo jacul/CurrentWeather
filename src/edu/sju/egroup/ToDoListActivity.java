@@ -43,7 +43,6 @@ public class ToDoListActivity extends Activity implements SettingsConstant, OnCl
 
 		ArrayList<HashMap<String, String>> listItem = new ArrayList<HashMap<String, String>>();
 
-		HashMap<String, String> todo = new HashMap<String, String>();
 		addToDoButton = (Button) this.findViewById(R.id.eventlist_addbutton);
 		addToDoButton.setOnClickListener(this);
  

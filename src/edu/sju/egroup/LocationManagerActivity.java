@@ -18,7 +18,6 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.view.View.OnCreateContextMenuListener;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -69,21 +68,7 @@ public class LocationManagerActivity extends Activity implements
 
 		locationslist = (ListView)this.findViewById(R.id.locationslist);
 		String locations = settings.getString(LOCATIONS, null);
-		locationsdata = new ArrayList<HashMap<String, Object>>();
-		//Get all the location data from the storage.
-		if (locations != null) {
-			try {
-				JSONArray array = new JSONArray(locations);
-				int len = array.length();
-				for (int i = 0; i < len; i++) {
-					JSONArray locationdata = array.getJSONArray(i);
-					LocationData data = new LocationData(locationdata);
-					locationsdata.add(data.toMap());
-				}
-			} catch (JSONException e) {
-				System.err.println(e.getClass().getName() + e.getMessage());
-			}
-		}
+		locationsdata = loadAllLocations(locations);
 		//set the behavior of this list.
 		locationslist.setAdapter(new SimpleAdapter(this, locationsdata,
 				R.layout.locationitem, new String[] { LOCATIONNAME },
@@ -113,6 +98,33 @@ public class LocationManagerActivity extends Activity implements
 				});
 	}
 
+	/**
+	 * Load all locations data from provided JSON string.
+	 * 
+	 * @param locations
+	 *            A JSON string representing all location data.
+	 * @return An array list containing all location data in HashMaps.
+	 */
+	public static ArrayList<HashMap<String, Object>> loadAllLocations(
+			String locations) {
+		ArrayList<HashMap<String, Object>> data = new ArrayList<HashMap<String, Object>>();
+		//Get all the location data from the storage.
+		if (locations != null) {
+			try {
+				JSONArray array = new JSONArray(locations);
+				int len = array.length();
+				for (int i = 0; i < len; i++) {
+					JSONArray locationdata = array.getJSONArray(i);
+					LocationData ldata = new LocationData(locationdata);
+					data.add(ldata.toMap());
+				}
+			} catch (JSONException e) {
+				System.err.println(e.getClass().getName() + e.getMessage());
+			}
+		}
+		return data;
+	}
+
 	// Menu
 	public boolean onContextItemSelected(MenuItem item) {
 		int itemid = item.getItemId();
@@ -120,9 +132,10 @@ public class LocationManagerActivity extends Activity implements
 		case DELETE:
 			locationsdata.remove(itemid);
 			((SimpleAdapter)locationslist.getAdapter()).notifyDataSetChanged();
+			saveAllLocations();
 			break;
 		case EDIT:
-
+			editLocation(itemid);
 			break;
 		case CANCEL:
 		default:
@@ -138,6 +151,12 @@ public class LocationManagerActivity extends Activity implements
 			LocationData ldata = new LocationData();
 			ldata.name = intent.getStringExtra(LOCATIONNAME);
 			ldata.useGPS = intent.getBooleanExtra(USEGPS, false);
+			for (int i = locationsdata.size() - 1; i >= 0; i--) {
+				HashMap<String, Object> hash = locationsdata.get(i);
+				if (hash.get(LOCATIONNAME).equals(ldata.name)) {
+					locationsdata.remove(i);
+				}
+			}
 			locationsdata.add(ldata.toMap());
 			saveAllLocations();
 			((SimpleAdapter)locationslist.getAdapter()).notifyDataSetChanged();
@@ -157,6 +176,22 @@ public class LocationManagerActivity extends Activity implements
 		Editor editor = settings.edit();
 		editor.putString(LOCATIONS, alllocations.toString());
 		editor.commit();
+	}
+
+	/**
+	 * Edit a location. The index of the location in the overall locations is
+	 * given.
+	 * 
+	 * @param itemid
+	 */
+	private void editLocation(int itemid) {
+		HashMap<String, Object> data = locationsdata.get(itemid);
+		Intent intent = new Intent(this, AddLocationActivity.class);
+		intent.putExtra(LOCATIONNAME, (String)data.get(LOCATIONNAME));
+		intent.putExtra(USEGPS, (Boolean)data.get(USEGPS));
+		intent.putExtra(LONG, (Double)data.get(LONG));
+		intent.putExtra(LATI, (Double)data.get(LATI));
+		this.startActivityForResult(intent, 0);
 	}
 
 	public void onClick(View v) {

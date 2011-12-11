@@ -15,6 +15,7 @@ public class WeatherData {
 	public String						forecast_date;
 	public String						current_date_time;
 	public String						unit_system;
+	public long							updatetime;
 
 	private static int					tempFormat	= 0;
 	public CurrentCondition				current;
@@ -24,6 +25,7 @@ public class WeatherData {
 
 	public WeatherData() {
 		current = new CurrentCondition();
+		updatetime = System.currentTimeMillis();
 	}
 
 	/**

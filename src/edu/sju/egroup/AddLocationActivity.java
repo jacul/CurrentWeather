@@ -39,17 +39,12 @@ public class AddLocationActivity extends Activity implements SettingsConstant,
 	 * Cancel button
 	 */
 	private Button				cancelButton;
-	/**
-	 * Settings
-	 */
-	private SharedPreferences	settings;
 
 	@Override
 	public void onCreate(Bundle savedBundle) {
 		super.onCreate(savedBundle);
 		this.setTitle("Add a Location");
 		Log.i("edu.sju.egroup", "create activity");
-		settings = this.getSharedPreferences(this.getPackageName(), 0);
 
 		// Set the view layout resource to use.
 		setContentView(R.layout.addlocation);
@@ -70,8 +65,13 @@ public class AddLocationActivity extends Activity implements SettingsConstant,
 		Intent intent = getIntent();
 		Bundle extras = intent.getExtras();
 		if (extras != null) {
+			//Editing a location
 			widgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
 					AppWidgetManager.INVALID_APPWIDGET_ID);
+			if(extras.getString(LOCATIONNAME)!=null){
+				locationText.setText(extras.getString(LOCATIONNAME));
+				useGPSCheck.setChecked(extras.getBoolean(USEGPS));
+			}
 		}
 
 	}
