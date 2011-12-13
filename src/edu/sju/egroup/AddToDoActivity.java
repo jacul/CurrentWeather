@@ -1,15 +1,15 @@
 package edu.sju.egroup;
 
-import java.util.HashMap;
-import java.util.HashSet;
-
-import org.json.JSONArray;
-
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.Spinner;
 
 /**
  * This activity is for users to add or edit their TO-DO actions which are based
@@ -18,7 +18,7 @@ import android.widget.Button;
  * @author zxd
  * 
  */
-public class AddToDoActivity extends Activity implements OnClickListener {
+public class AddToDoActivity extends Activity implements OnClickListener, SettingsConstant {
 
 	/**
 	 * Save button
@@ -28,6 +28,22 @@ public class AddToDoActivity extends Activity implements OnClickListener {
 	 * Cancel button
 	 */
 	private Button cancelButton;
+	/**
+	 * Spinner to choos weather condition
+	 */
+	private Spinner weatherSpinner;
+	/**
+	 * Content about what to do
+	 */
+	private EditText toDoField;
+	/**
+	 * CheckBox for reminding by sound
+	 */
+	private CheckBox soundCheck;
+	/**
+	 * CheckBox for reminding by Vibration
+	 */
+	private CheckBox vibrationCheck;
 
 	public void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
@@ -38,17 +54,30 @@ public class AddToDoActivity extends Activity implements OnClickListener {
 
 		cancelButton = (Button) this.findViewById(R.id.addevent_cancelbutton);
 		cancelButton.setOnClickListener(this);
-		
-		
+
+		weatherSpinner = (Spinner) this.findViewById(R.id.weathertype);
+		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.weatherconditions,
+				android.R.layout.simple_spinner_item);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		weatherSpinner.setAdapter(adapter);
+
+		toDoField = (EditText) this.findViewById(R.id.todotextfield);
+
+		soundCheck = (CheckBox) this.findViewById(R.id.usesound);
+
+		vibrationCheck = (CheckBox) this.findViewById(R.id.usevibrate);
 	}
 
 	public void onClick(View v) {
 		if (v == saveButton) {
-			HashSet<String> map = new HashSet<String>();
-			map.add("Holyshit");
-			map.add("wocao");
-			JSONArray json=new JSONArray(map);
-			System.out.println(json.toString());
+			Intent resultValue = new Intent();
+			resultValue.putExtra(TODOTEXT, toDoField.getText().toString());
+			resultValue.putExtra(WEATHERCONDITION, this.getResources().getStringArray(R.array.weatherconditions)[weatherSpinner
+					.getSelectedItemPosition()]);
+			resultValue.putExtra(USESOUND, soundCheck.isChecked());
+			resultValue.putExtra(USEVIBRATION, vibrationCheck.isChecked());
+			setResult(RESULT_OK, resultValue);
+			finish();
 		} else if (v == cancelButton) {
 			finish();
 		}
