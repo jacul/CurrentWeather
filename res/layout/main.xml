@@ -13,9 +13,24 @@
 
 
 
+
+
+
+
+
     android:id="@+id/relativeLayout1"
     android:layout_width="190dp"
     android:layout_height="190dp">
+
+    
+
+    
+
+    
+
+    
+
+    
 
     
 
@@ -195,37 +210,54 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="5dp" >
 
-        <ImageView
-            android:id="@+id/currentimage"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/na" />
-
         <LinearLayout
             android:id="@+id/linearLayout4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="2dp"
             android:orientation="vertical" >
-
-            <TextView
-                android:id="@+id/cityinfo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/app_name"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="#000000"
-                android:textSize="11dp" />
-
-            <TextView
-                android:id="@+id/temptext"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Temp"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="#2e8b57" />
         </LinearLayout>
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/currentimage"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignTop="@+id/linearLayout1"
+        android:scaleType="centerCrop"
+        android:src="@drawable/na" />
+
+    <RelativeLayout
+        android:id="@+id/relativeLayoutp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/currentimage"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/cityinfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginRight="9dp"
+            android:text="@string/app_name"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#000000"
+            android:textSize="11dp" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/temptext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/currentimage"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="40dp"
+        android:text="Temp"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#2e8b57" />
 
 </RelativeLayout>

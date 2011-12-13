@@ -8,7 +8,6 @@ package edu.sju.egroup;
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -52,7 +51,7 @@ public class AddLocationActivity extends Activity implements SettingsConstant,
 		// Find the EditText
 		locationText = (EditText)findViewById(R.id.locationText);
 
-		// Find the Checkbox
+		// Find the CheckBox
 		useGPSCheck = (CheckBox)findViewById(R.id.usegps);
 
 		// Bind the action for the save button.

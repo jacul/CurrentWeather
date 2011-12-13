@@ -7,9 +7,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.MenuItem;
@@ -30,28 +33,27 @@ import android.widget.AdapterView.OnItemClickListener;
  * @author zxd
  * 
  */
-public class LocationManagerActivity extends Activity implements
-		SettingsConstant, OnClickListener {
+public class LocationManagerActivity extends Activity implements SettingsConstant, OnClickListener {
 	/**
 	 * Add location button.
 	 */
-	private Button								addLocationButton;
+	private Button addLocationButton;
 	/**
 	 * Save button
 	 */
-	private Button								backButton;
+	private Button backButton;
 	/**
 	 * List of locations.
 	 */
-	private ListView							locationslist;
+	private ListView locationslist;
 	/**
 	 * All locations data.
 	 */
-	private ArrayList<HashMap<String, Object>>	locationsdata;
+	private ArrayList<HashMap<String, Object>> locationsdata;
 	/**
 	 * Settings
 	 */
-	private SharedPreferences					settings;
+	private SharedPreferences settings;
 
 	public void onCreate(Bundle bundle) {
 		this.setTitle("Manage Locations");
@@ -60,42 +62,38 @@ public class LocationManagerActivity extends Activity implements
 
 		this.setContentView(R.layout.locationmanage);
 
-		addLocationButton = (Button)this.findViewById(R.id.addlocationbutton);
+		addLocationButton = (Button) this.findViewById(R.id.addlocationbutton);
 		addLocationButton.setOnClickListener(this);
 
-		backButton = (Button)this.findViewById(R.id.lomanage_backbutton);
+		backButton = (Button) this.findViewById(R.id.lomanage_backbutton);
 		backButton.setOnClickListener(this);
 
-		locationslist = (ListView)this.findViewById(R.id.locationslist);
+		locationslist = (ListView) this.findViewById(R.id.locationslist);
 		String locations = settings.getString(LOCATIONS, null);
 		locationsdata = loadAllLocations(locations);
-		//set the behavior of this list.
-		locationslist.setAdapter(new SimpleAdapter(this, locationsdata,
-				R.layout.locationitem, new String[] { LOCATIONNAME },
+		// set the behavior of this list.
+		locationslist.setAdapter(new SimpleAdapter(this, locationsdata, R.layout.locationitem, new String[] { LOCATIONNAME },
 				new int[] { R.id.locationname }));
 		// click on the item
 		locationslist.setOnItemClickListener(new OnItemClickListener() {
 
-			public void onItemClick(AdapterView<?> adapter, View view,
-					int index, long arg3) {
+			public void onItemClick(AdapterView<?> adapter, View view, int index, long arg3) {
 
 			}
 		});
 
 		// hold down event
-		locationslist
-				.setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
+		locationslist.setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
 
-					public void onCreateContextMenu(ContextMenu menu, View v,
-							ContextMenuInfo menuInfo) {
-						AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
-						int itemid = info.position;
-						menu.add(0, itemid, EDIT, "Edit");
-						menu.add(0, itemid, DELETE, "Delete");
-						menu.add(0, itemid, CANCEL, "Cancel");
-					}
+			public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+				AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+				int itemid = info.position;
+				menu.add(0, itemid, EDIT, "Edit");
+				menu.add(0, itemid, DELETE, "Delete");
+				menu.add(0, itemid, CANCEL, "Cancel");
+			}
 
-				});
+		});
 	}
 
 	/**
@@ -105,10 +103,28 @@ public class LocationManagerActivity extends Activity implements
 	 *            A JSON string representing all location data.
 	 * @return An array list containing all location data in HashMaps.
 	 */
-	public static ArrayList<HashMap<String, Object>> loadAllLocations(
-			String locations) {
+	public static ArrayList<HashMap<String, Object>> loadAllLocations(String locations) {
 		ArrayList<HashMap<String, Object>> data = new ArrayList<HashMap<String, Object>>();
-		//Get all the location data from the storage.
+		// Get all the location data from the storage.
+		if (locations != null) {
+			ArrayList<LocationData> locationdatas = loadAllLocationData(locations);
+			for (LocationData ldata : locationdatas) {
+				data.add(ldata.toMap());
+			}
+		}
+		return data;
+	}
+
+	/**
+	 * Load all location data from a string and store them in an Arraylist.
+	 * 
+	 * @param locations
+	 *            JSON string representing all locations.
+	 * @return An Arraylist containing all locations.
+	 */
+	public static ArrayList<LocationData> loadAllLocationData(String locations) {
+		ArrayList<LocationData> data = new ArrayList<LocationData>();
+		// Get all the location data from the storage.
 		if (locations != null) {
 			try {
 				JSONArray array = new JSONArray(locations);
@@ -116,7 +132,7 @@ public class LocationManagerActivity extends Activity implements
 				for (int i = 0; i < len; i++) {
 					JSONArray locationdata = array.getJSONArray(i);
 					LocationData ldata = new LocationData(locationdata);
-					data.add(ldata.toMap());
+					data.add(ldata);
 				}
 			} catch (JSONException e) {
 				System.err.println(e.getClass().getName() + e.getMessage());
@@ -131,7 +147,7 @@ public class LocationManagerActivity extends Activity implements
 		switch (item.getOrder()) {
 		case DELETE:
 			locationsdata.remove(itemid);
-			((SimpleAdapter)locationslist.getAdapter()).notifyDataSetChanged();
+			((SimpleAdapter) locationslist.getAdapter()).notifyDataSetChanged();
 			saveAllLocations();
 			break;
 		case EDIT:
@@ -145,12 +161,19 @@ public class LocationManagerActivity extends Activity implements
 
 	}
 
-	protected void onActivityResult(int requestCode, int resultCode,
-			Intent intent) {
+	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		if (resultCode == RESULT_OK) {
 			LocationData ldata = new LocationData();
 			ldata.name = intent.getStringExtra(LOCATIONNAME);
 			ldata.useGPS = intent.getBooleanExtra(USEGPS, false);
+			if (ldata.useGPS) {
+				LocationManager manager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+				Location lastlocation = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+				if (lastlocation != null) {
+					ldata.latitude = lastlocation.getLatitude();
+					ldata.longitude = lastlocation.getLongitude();
+				}
+			}
 			for (int i = locationsdata.size() - 1; i >= 0; i--) {
 				HashMap<String, Object> hash = locationsdata.get(i);
 				if (hash.get(LOCATIONNAME).equals(ldata.name)) {
@@ -159,7 +182,7 @@ public class LocationManagerActivity extends Activity implements
 			}
 			locationsdata.add(ldata.toMap());
 			saveAllLocations();
-			((SimpleAdapter)locationslist.getAdapter()).notifyDataSetChanged();
+			((SimpleAdapter) locationslist.getAdapter()).notifyDataSetChanged();
 		}
 	}
 
@@ -170,7 +193,7 @@ public class LocationManagerActivity extends Activity implements
 	private void saveAllLocations() {
 		JSONArray alllocations = new JSONArray();
 		for (HashMap<String, Object> data : locationsdata) {
-			LocationData location = (LocationData)data.get(LOCATION);
+			LocationData location = (LocationData) data.get(LOCATION);
 			alllocations.put(location.toJSONArray());
 		}
 		Editor editor = settings.edit();
@@ -187,10 +210,10 @@ public class LocationManagerActivity extends Activity implements
 	private void editLocation(int itemid) {
 		HashMap<String, Object> data = locationsdata.get(itemid);
 		Intent intent = new Intent(this, AddLocationActivity.class);
-		intent.putExtra(LOCATIONNAME, (String)data.get(LOCATIONNAME));
-		intent.putExtra(USEGPS, (Boolean)data.get(USEGPS));
-		intent.putExtra(LONG, (Double)data.get(LONG));
-		intent.putExtra(LATI, (Double)data.get(LATI));
+		intent.putExtra(LOCATIONNAME, (String) data.get(LOCATIONNAME));
+		intent.putExtra(USEGPS, (Boolean) data.get(USEGPS));
+		intent.putExtra(LONG, (Double) data.get(LONG));
+		intent.putExtra(LATI, (Double) data.get(LATI));
 		this.startActivityForResult(intent, 0);
 	}
 

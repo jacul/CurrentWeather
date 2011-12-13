@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Timer;
@@ -25,7 +26,6 @@ import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -37,37 +37,40 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
-public class UpdateService extends Service implements Runnable,
-		NetworkConstant, SettingsConstant, LocationListener {
+public class UpdateService extends Service implements Runnable, NetworkConstant, SettingsConstant, LocationListener {
 	/**
 	 * Flag indicating if this service is running.
 	 */
-	private static boolean					isRunning			= false;
+	private static boolean isRunning = false;
 	/**
 	 * Id of the widgets that are waiting to be refreshed.
 	 */
-	private static ArrayList<Integer>		widgetIds			= new ArrayList<Integer>();
+	private static ArrayList<Integer> widgetIds = new ArrayList<Integer>();
+	/**
+	 * The id of last widget we know. Used in auto update based on location.
+	 */
+	private int lastWidget = 0;
 	/**
 	 * Timer to restart this service in order to perform a update.
 	 */
-	private static Timer					updatetimer;
+	private static Timer updatetimer;
 	/**
 	 * A cache holding all weather data.
 	 */
-	private HashMap<String, WeatherData>	weatherdatacache	= new HashMap<String, WeatherData>();
+	private HashMap<String, WeatherData> weatherdatacache = new HashMap<String, WeatherData>();
 	/**
 	 * If there are more than one locations to display, the first location is
 	 * displayed. Then we can
 	 */
-	private int								locationindex		= 0;
+	private int locationindex = 0;
 	/**
 	 * The location to update.
 	 */
-	private String							location;
+	private LocationData location;
 	/**
 	 * The settings.
 	 */
-	private SharedPreferences				settings;
+	private SharedPreferences settings;
 
 	@Override
 	public void onStart(Intent intent, int startId) {
@@ -77,8 +80,7 @@ public class UpdateService extends Service implements Runnable,
 		settings = this.getSharedPreferences(this.getPackageName(), 0);
 
 		String locations = settings.getString(LOCATIONS, null);
-		ArrayList<HashMap<String, Object>> locationsdata = LocationManagerActivity
-				.loadAllLocations(locations);
+		ArrayList<HashMap<String, Object>> locationsdata = LocationManagerActivity.loadAllLocations(locations);
 
 		if (locationsdata.size() == 0)
 			return;
@@ -87,14 +89,14 @@ public class UpdateService extends Service implements Runnable,
 			locationindex = 0;
 		}
 
-		location = (String)locationsdata.get(locationindex).get(LOCATIONNAME);
+		ArrayList<LocationData> locationdatas = LocationManagerActivity.loadAllLocationData(settings.getString(LOCATIONS, null));
+		location = locationdatas.get(locationindex);
 
 		// Get the given widget id so that we can update it.
 		Bundle extras = intent.getExtras();
 		if (extras != null) {
 			// It's a collection of id's
-			int[] widgetId = extras
-					.getIntArray(AppWidgetManager.EXTRA_APPWIDGET_IDS);
+			int[] widgetId = extras.getIntArray(AppWidgetManager.EXTRA_APPWIDGET_IDS);
 			if (widgetId != null) {
 				for (int id : widgetId) {
 					widgetIds.add(id);
@@ -102,23 +104,21 @@ public class UpdateService extends Service implements Runnable,
 			}
 
 			// It can be a single id.
-			int wid = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
-					AppWidgetManager.INVALID_APPWIDGET_ID);
+			int wid = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
 			if (wid != AppWidgetManager.INVALID_APPWIDGET_ID) {
 				widgetIds.add(wid);
 			}
 
 			if (extras.containsKey(LOCATIONNAME)) {
-				//The update request is to change to the next location.
+				// The update request is to change to the next location.
 				locationindex++;
 				if (locationindex >= locationsdata.size())
 					locationindex = 0;
-				location = (String)locationsdata.get(locationindex).get(
-						LOCATIONNAME);
+				location = locationdatas.get(locationindex);
 			}
 		}
 
-		location();
+		registLocationListener();
 		if (!isRunning) {
 			isRunning = true;
 			new Thread(this).start();
@@ -128,39 +128,40 @@ public class UpdateService extends Service implements Runnable,
 	/**
 	 * Setup the location listener.
 	 */
-	private void location() {
+	private void registLocationListener() {
 
 		LocationManager locationManager;
-		locationManager = (LocationManager)this
-				.getSystemService(Context.LOCATION_SERVICE);
-		Criteria criteria = new Criteria();
-		criteria.setAccuracy(Criteria.ACCURACY_FINE);
-		criteria.setAltitudeRequired(false);
-		criteria.setBearingRequired(false);
-		criteria.setCostAllowed(true);
-		criteria.setPowerRequirement(Criteria.POWER_LOW);
-		String provider = locationManager.getBestProvider(criteria, true);
+		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
-		locationManager.requestLocationUpdates(provider, 60000, 5, this);
-		Location location = locationManager.getLastKnownLocation(provider);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 100, this);
 	}
 
 	public void onLocationChanged(Location location) {
-		Log.i("location", "latitude" + location.getLatitude());
-		Log.i("location", "longitude" + location.getLongitude());
+		double latitude = location.getLatitude();
+		double longitude = location.getLongitude();
+		ArrayList<LocationData> locationdatas = LocationManagerActivity.loadAllLocationData(settings.getString(LOCATIONS, null));
+		for (LocationData data : locationdatas) {
+			if (data.useGPS) {
+				if (Math.pow(latitude - data.latitude, 2) + Math.pow(longitude - data.longitude, 2) <= 0.5) {
+					System.out.println(Math.pow(12, 2));
+					WeatherData weather = this.retrieveWeatherInfo(data);
+					setWidgetContent(weather, lastWidget);
+					break;
+				}
+			}
+		}
 	}
 
 	public void onProviderDisabled(String provider) {
 
-		Log.i("", provider);
 	}
 
 	public void onProviderEnabled(String provider) {
-		Log.i("", provider);
+
 	}
 
 	public void onStatusChanged(String provider, int status, Bundle extras) {
-		Log.i("", status + "");
+
 	}
 
 	@Override
@@ -210,9 +211,7 @@ public class UpdateService extends Service implements Runnable,
 				setWidgetContent(data, getNextWidgetID());
 			} else {
 				Looper.prepare();
-				Toast.makeText(getApplicationContext(),
-						"This is not a valid location!", Toast.LENGTH_SHORT)
-						.show();
+				Toast.makeText(getApplicationContext(), "This is not a valid location!", Toast.LENGTH_SHORT).show();
 				Looper.loop();
 			}
 		}
@@ -230,8 +229,7 @@ public class UpdateService extends Service implements Runnable,
 	 * if it is already set, it will be cancelled.
 	 */
 	private void setAutoUpdate() {
-		if (0 == settings.getInt(AUTOMATIC, 1)
-				&& INTERVAL.length - 1 != settings.getInt(UPDATEFREQ, 0)) {
+		if (0 == settings.getInt(AUTOMATIC, 1) && INTERVAL.length - 1 != settings.getInt(UPDATEFREQ, 0)) {
 			// 0 on, 1 off
 			if (updatetimer != null)
 				updatetimer.cancel();
@@ -241,8 +239,7 @@ public class UpdateService extends Service implements Runnable,
 			for (int i = 0; i < widgetIds.size(); i++) {
 				id[i] = widgetIds.get(i);
 			}
-			updatetimer.schedule(new UpdateTimer(this.getApplicationContext(),
-					id), delay, delay);
+			updatetimer.schedule(new UpdateTimer(this.getApplicationContext(), id), delay, delay);
 		} else {
 			// set to turn off, cancel it.
 			if (updatetimer != null)
@@ -256,7 +253,8 @@ public class UpdateService extends Service implements Runnable,
 	 * @return next widget id.
 	 */
 	private int getNextWidgetID() {
-		return widgetIds.remove(0);
+		lastWidget = widgetIds.remove(0);
+		return lastWidget;
 	}
 
 	/**
@@ -274,18 +272,24 @@ public class UpdateService extends Service implements Runnable,
 	 * 
 	 * @return Weather information we get from web.
 	 */
-	protected WeatherData retrieveWeatherInfo(String locationname) {
-		if (weatherdatacache.containsKey(locationname)) {
-			WeatherData data = weatherdatacache.get(locationname);
-			if (System.currentTimeMillis() - data.updatetime < INTERVAL[settings
-					.getInt(UPDATEFREQ, 0)]) {//update time is within update interval
-				//then this weather data can be reused.
+	protected WeatherData retrieveWeatherInfo(LocationData location) {
+		if (weatherdatacache.containsKey(location.name)) {
+			WeatherData data = weatherdatacache.get(location.name);
+			if (System.currentTimeMillis() - data.updatetime < INTERVAL[settings.getInt(UPDATEFREQ, 0)]) {
+				// update time is within update interval, then this weather data
+				// can be reused.
 				return data;
 			}
 		}
-		
-		String resourcePath = HOSTURL + WEATHERPARA
-				+ Uri.encode(locationname, "/");
+
+		String resourcePath;
+		if (location.useGPS) {
+			DecimalFormat format = new DecimalFormat(".000000");
+			String gpsdata = ",,," + format.format(location.latitude) + "," + format.format(location.longitude);
+			resourcePath = HOSTURL + WEATHERPARA + gpsdata.replace(".", "");
+		} else {
+			resourcePath = HOSTURL + WEATHERPARA + Uri.encode(location.name, "/");
+		}
 		byte[] b = UpdateService.getResource(resourcePath);
 		if (b == null)
 			return null;
@@ -295,7 +299,10 @@ public class UpdateService extends Service implements Runnable,
 			parser.parse();
 			data = parser.getResult();
 			data.setTempFormat(settings.getInt(TEMPFORMAT, 0));
-			weatherdatacache.put(locationname, data);
+			if (location.useGPS)
+				data.city = location.name;// There is no city info in the result
+			// by sending GPS data.
+			weatherdatacache.put(location.name, data);
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
 		} catch (SAXException e) {
@@ -318,38 +325,27 @@ public class UpdateService extends Service implements Runnable,
 	 */
 	protected void setWidgetContent(WeatherData data, int widgetId) {
 		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
-		RemoteViews views = new RemoteViews(this.getPackageName(),
-				R.layout.main);
+		RemoteViews views = new RemoteViews(this.getPackageName(), R.layout.main);
 
-		views.setTextViewText(R.id.cityinfo, data.city + " " + data.postal_code
-				+ "\n" + data.current.condition);
+		views.setTextViewText(R.id.cityinfo, data.city + " " + data.postal_code + "\n" + data.current.condition);
 
 		// set temperature text. Format depends on the settings.
 		views.setTextViewText(R.id.temptext, data.current.getTemp());
 
-		views.setTextViewText(R.id.d1, data.forecasts.get(0).day_of_week + "\n"
-				+ data.forecasts.get(0).getHigh() + "/"
+		views.setTextViewText(R.id.d1, data.forecasts.get(0).day_of_week + "\n" + data.forecasts.get(0).getHigh() + "/"
 				+ data.forecasts.get(0).getLow());
-		views.setTextViewText(R.id.d2, data.forecasts.get(1).day_of_week + "\n"
-				+ data.forecasts.get(1).getHigh() + "/"
+		views.setTextViewText(R.id.d2, data.forecasts.get(1).day_of_week + "\n" + data.forecasts.get(1).getHigh() + "/"
 				+ data.forecasts.get(1).getLow());
-		views.setTextViewText(R.id.d3, data.forecasts.get(2).day_of_week + "\n"
-				+ data.forecasts.get(2).getHigh() + "/"
+		views.setTextViewText(R.id.d3, data.forecasts.get(2).day_of_week + "\n" + data.forecasts.get(2).getHigh() + "/"
 				+ data.forecasts.get(2).getLow());
-		views.setTextViewText(R.id.d4, data.forecasts.get(3).day_of_week + "\n"
-				+ data.forecasts.get(3).getHigh() + "/"
+		views.setTextViewText(R.id.d4, data.forecasts.get(3).day_of_week + "\n" + data.forecasts.get(3).getHigh() + "/"
 				+ data.forecasts.get(3).getLow());
 
-		views.setBitmap(R.id.currentimage, "setImageBitmap", IconFactory
-				.getIcon(data.current.icon));
-		views.setBitmap(R.id.fore1, "setImageBitmap", IconFactory
-				.getIcon(data.forecasts.get(0).icon));
-		views.setBitmap(R.id.fore2, "setImageBitmap", IconFactory
-				.getIcon(data.forecasts.get(1).icon));
-		views.setBitmap(R.id.fore3, "setImageBitmap", IconFactory
-				.getIcon(data.forecasts.get(2).icon));
-		views.setBitmap(R.id.fore4, "setImageBitmap", IconFactory
-				.getIcon(data.forecasts.get(3).icon));
+		views.setBitmap(R.id.currentimage, "setImageBitmap", IconFactory.getIcon(data.current.icon));
+		views.setBitmap(R.id.fore1, "setImageBitmap", IconFactory.getIcon(data.forecasts.get(0).icon));
+		views.setBitmap(R.id.fore2, "setImageBitmap", IconFactory.getIcon(data.forecasts.get(1).icon));
+		views.setBitmap(R.id.fore3, "setImageBitmap", IconFactory.getIcon(data.forecasts.get(2).icon));
+		views.setBitmap(R.id.fore4, "setImageBitmap", IconFactory.getIcon(data.forecasts.get(3).icon));
 		// Tell the widget manager
 		appWidgetManager.updateAppWidget(widgetId, views);
 	}
@@ -362,8 +358,8 @@ public class UpdateService extends Service implements Runnable,
 	 * 
 	 */
 	private class UpdateTimer extends TimerTask {
-		private Context	context;
-		private int[]	widgetIds;
+		private Context context;
+		private int[] widgetIds;
 
 		public UpdateTimer(Context context, int[] widgetIds) {
 			this.context = context;
@@ -372,8 +368,7 @@ public class UpdateService extends Service implements Runnable,
 
 		public void run() {
 			Intent firstUpdateIntent = new Intent(context, UpdateService.class);
-			firstUpdateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS,
-					widgetIds);
+			firstUpdateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds);
 			context.startService(firstUpdateIntent);
 		}
 

@@ -31,7 +31,6 @@ public class IconFactory implements NetworkConstant {
 	 * @return The icon file represented by this url.
 	 */
 	public static Bitmap getIcon(String iconpath) {
-		System.out.println(iconpath);
 		if (iconCache.containsKey(iconpath)) {
 			return iconCache.get(iconpath);
 		} else {
